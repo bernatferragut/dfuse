@@ -50,7 +50,7 @@ async function main() {
 				const paragraphNode = document.createElement('li');
 				paragraphNode.innerText = `Transfer ${from} -> ${to} [${quantity}]${undo ? ' REVERTED' : ''}`;
 
-				document.body.prepend(paragraphNode);
+				document.body.append(paragraphNode);
 			});
 
 			// Mark stream at cursor location, on re-connect, we will start back at cursor
@@ -62,14 +62,14 @@ async function main() {
 			const paragraphNode = document.createElement('li');
 			paragraphNode.innerText = `An error occurred ${JSON.stringify({ errors, terminal })}`;
 
-			document.body.prepend(paragraphNode);
+			document.body.append(paragraphNode);
 		}
 
 		if (message.type === 'complete') {
 			const paragraphNode = document.createElement('li');
 			paragraphNode.innerText = 'Completed';
 
-			document.body.prepend(paragraphNode);
+			document.body.append(paragraphNode);
 		}
 	});
 
