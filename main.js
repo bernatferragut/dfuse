@@ -21,6 +21,47 @@ const TOKEN = {
 };
 
 // 2. Adding the Client Library
-// npm install @dfuse/client
+// <script src="https://unpkg.com/@dfuse/client"></script>
 
 // 3. Create the client
+const client = dfuseClient.createDfuseClient({
+	apiKey: 'web_4605956e15570c86603893d01083b10a',
+	network: 'mainnet.eos.dfuse.io'
+  })
+
+  // 4. Stream your first 
+async function main() {
+  const stream = await client.graphql(operation, (message) => {
+    if (message.type === "data") {
+      const { undo, cursor, trace: { id, matchingActions }} = message.data.searchTransactionsForward
+      matchingActions.forEach(({ json: { from, to, quantity } }) => {
+        const paragraphNode = document.createElement("li")
+        paragraphNode.innerText = `Transfer ${from} -> ${to} [${quantity}]${undo ? " REVERTED" : ""}`
+
+        document.body.prepend(paragraphNode)
+      })
+
+      // Mark stream at cursor location, on re-connect, we will start back at cursor
+      stream.mark({ cursor })
+    }
+
+    if (message.type === "error") {
+      const { errors, terminal } = message
+      const paragraphNode = document.createElement("li")
+      paragraphNode.innerText = `An error occurred ${JSON.stringify({ errors, terminal })}`
+
+      document.body.prepend(paragraphNode)
+    }
+
+    if (message.type === "complete") {
+        const paragraphNode = document.createElement("li")
+        paragraphNode.innerText = "Completed"
+
+        document.body.prepend(paragraphNode)
+    }
+  })
+
+  // Waits until the stream completes, or forever
+  await stream.join()
+  await client.release()
+}
