@@ -1,0 +1,7 @@
+# DFUSE-TESTING-API
+
+Key
+web_4605956e15570c86603893d01083b10a
+JWTs Lifetime
+1 day
+
