@@ -21,3 +21,6 @@ const TOKEN = {
 };
 
 // 2. Adding the Client Library
+// npm install @dfuse/client
+
+// 3. Create the client
