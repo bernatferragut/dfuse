@@ -27,41 +27,53 @@ const TOKEN = {
 const client = dfuseClient.createDfuseClient({
 	apiKey: 'web_4605956e15570c86603893d01083b10a',
 	network: 'mainnet.eos.dfuse.io'
-  })
+});
 
-  // 4. Stream your first 
+// 4. Stream your first results
+// Let’s first define the GraphQL operation, as a string, that we will use to perform GraphQL subscription.Define what you want
+// You must use a `$cursor` variable so stream starts back at last marked cursor on reconnect!
+const operation = `subscription($cursor: String!) {
+	searchTransactionsForward(query:"receiver:eosio.token action:transfer -data.quantity:'0.0001 EOS'", cursor: $cursor) {
+		undo cursor
+		trace { id matchingActions { json } }
+	}
+}`;
+
+// Next, you create the GraphQL subscription to stream transfers as they come.
+// You can combine the dfuse client instance we created in step 3 with the GraphQL document we defined above in a main function:
+
 async function main() {
-  const stream = await client.graphql(operation, (message) => {
-    if (message.type === "data") {
-      const { undo, cursor, trace: { id, matchingActions }} = message.data.searchTransactionsForward
-      matchingActions.forEach(({ json: { from, to, quantity } }) => {
-        const paragraphNode = document.createElement("li")
-        paragraphNode.innerText = `Transfer ${from} -> ${to} [${quantity}]${undo ? " REVERTED" : ""}`
+	const stream = await client.graphql(operation, (message) => {
+		if (message.type === 'data') {
+			const { undo, cursor, trace: { id, matchingActions } } = message.data.searchTransactionsForward;
+			matchingActions.forEach(({ json: { from, to, quantity } }) => {
+				const paragraphNode = document.createElement('li');
+				paragraphNode.innerText = `Transfer ${from} -> ${to} [${quantity}]${undo ? ' REVERTED' : ''}`;
 
-        document.body.prepend(paragraphNode)
-      })
+				document.body.prepend(paragraphNode);
+			});
 
-      // Mark stream at cursor location, on re-connect, we will start back at cursor
-      stream.mark({ cursor })
-    }
+			// Mark stream at cursor location, on re-connect, we will start back at cursor
+			stream.mark({ cursor });
+		}
 
-    if (message.type === "error") {
-      const { errors, terminal } = message
-      const paragraphNode = document.createElement("li")
-      paragraphNode.innerText = `An error occurred ${JSON.stringify({ errors, terminal })}`
+		if (message.type === 'error') {
+			const { errors, terminal } = message;
+			const paragraphNode = document.createElement('li');
+			paragraphNode.innerText = `An error occurred ${JSON.stringify({ errors, terminal })}`;
 
-      document.body.prepend(paragraphNode)
-    }
+			document.body.prepend(paragraphNode);
+		}
 
-    if (message.type === "complete") {
-        const paragraphNode = document.createElement("li")
-        paragraphNode.innerText = "Completed"
+		if (message.type === 'complete') {
+			const paragraphNode = document.createElement('li');
+			paragraphNode.innerText = 'Completed';
 
-        document.body.prepend(paragraphNode)
-    }
-  })
+			document.body.prepend(paragraphNode);
+		}
+	});
 
-  // Waits until the stream completes, or forever
-  await stream.join()
-  await client.release()
+	// Waits until the stream completes, or forever
+	await stream.join();
+	await client.release();
 }
