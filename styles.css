@@ -2,6 +2,12 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap');
 
 html {
+    background-color: black;
+    color: greenyellow;
     font-family: 'IBM Plex Sans', sans-serif;
     margin: 10px;
+}
+
+li {
+    font-size: 0.1rem;
 }

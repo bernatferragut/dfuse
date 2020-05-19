@@ -77,3 +77,7 @@ async function main() {
 	await stream.join();
 	await client.release();
 }
+
+// 5. Full Working Examples
+main().catch(error => console.log('Unexpected error', error));
+
